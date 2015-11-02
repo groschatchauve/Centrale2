@@ -19,11 +19,18 @@ public class ThreadEcoute extends Thread {
 	@Override
 	public void run() {
 		DatagramSocket socket;
+		String listVehicules = "Liste des Véhicules disponibles : ";
 		try {
 			socket = new DatagramSocket(port);
+			DatagramPacket data = new DatagramPacket(buffer, buffer.length);
 			DatagramPacket dataReceived = new DatagramPacket(buffer, buffer.length);
 			while(true){
 				socket.receive(dataReceived);
+				for(Vehicule v : flotte){
+					if(v.getIsDisponible())
+						listVehicules += v.getIdVehicule() + ", ";
+				}
+				//socket.send();
 			}
 		}catch (Exception e) {e.printStackTrace();}
 	}
