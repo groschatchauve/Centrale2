@@ -20,16 +20,13 @@ public class Server {
 		//initialisation equipe
 		for(int i=0; i<NB_MAX_EMPLOYE; ++i)
 			staff.add(new Employe());
-
 		
-		//InetAddress serveur = InetAddress.getByName("localhost");  //à mettre dans le client pour qu'il ait l'adresse du serveur
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		String newData = "";
 		ThreadEcoute threadEcoute = new ThreadEcoute(flotte);
 		threadEcoute.start();
 
 		newData = inFromUser.readLine();
-
 	}
 
 }
