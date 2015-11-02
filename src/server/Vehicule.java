@@ -27,6 +27,6 @@ public class Vehicule {
 
 		@Override
 		public String toString(){
-			return "<tr><td>"+idVehicule+"</td><td>"+isDisponible+"</td></tr>";
+			return idVehicule+" : "+isDisponible;
 		}
 }
