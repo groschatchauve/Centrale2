@@ -14,10 +14,10 @@ public class Employe {
 	}
 
 	public void setVehiculeDisponibilite() throws InterruptedException{
+		//set disponibilite vehicule
+		this.reservation.getVehicule().setEtatVehicule(EtatVehicule.EN_ATTENTE);
 		//wait temps préparation véhicule
 		Thread.sleep(this.efficacite * this.reservation.getVehicule().getTempsPreparation());
-		//set disponibilite vehicule
-		this.reservation.getVehicule().setIsDisponible(true);
 		//on desaffecte la reservation à l'employé
 		this.reservation = null;
 	}

@@ -10,7 +10,7 @@ public class Client {
 		if(!serveur.isReachable(5000))
 			throw new Exception("Le serveur a mis trop de temps à répondre.");
 		
-		String request, answer, line;
+		String request, answer;
 
 		//Création du scanner pour l'utilisateur
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
@@ -26,18 +26,23 @@ public class Client {
         
         System.out.println("Client connecté...");
         
-        //Traitement de la saisie de l'utilisateur
-        while(!(request = inFromUser.readLine()).toUpperCase().equals(STOP)){
+        outToServer.println("FLOTTE_DISPONIBLE");
+        System.err.println("FROM SERVER: " + inFromServer.readLine());
 
+        
+        //Traitement de la saisie de l'utilisateur
+        while(!(request = inFromUser.readLine().toUpperCase()).equals(STOP)){
+        	
 	        //Emission des données au serveur
 	        outToServer.println(request);
 	
 	        //Lecture des données arrivant du serveur
-	        answer = "";
-	        while((line = inFromServer.readLine()) != STOP) // TODO
-	        	answer += line;
-	        
+	        answer = inFromServer.readLine();	        
 	        System.err.println("FROM SERVER: " + answer);
+	        if(answer.equals("WAIT")){
+		        answer = inFromServer.readLine();	 
+		        System.err.println("FROM SERVER: " + answer);
+	        }
         }
         outToServer.println(request);
         inFromUser.close();
