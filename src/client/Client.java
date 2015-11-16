@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 public class Client {
 	private final static String STOP  = "STOP";
+	private final static String WAIT  = "WAIT";
+
 	
 	public static void main(String[] args) throws Exception{
 		InetAddress serveur = InetAddress.getByName("localhost");
@@ -39,7 +41,7 @@ public class Client {
 	        //Lecture des données arrivant du serveur
 	        answer = inFromServer.readLine();	        
 	        System.err.println("FROM SERVER: " + answer);
-	        if(answer.equals("WAIT")){
+	        if(answer.equals(WAIT)){
 		        answer = inFromServer.readLine();	 
 		        System.err.println("FROM SERVER: " + answer);
 	        }

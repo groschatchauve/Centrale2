@@ -76,7 +76,9 @@ public class ThreadEcoute extends Thread {
 			        			//Attente validation ou invalidation par l'admin
 			        			System.out.println("Admin must validate or invalidate new reservation "+reservation);
 			        			//TODO boucle
-			        			while(reservation.getEtatReservation() == EtatReservation.EN_ATTENTE);
+			        			while(reservation.getEtatReservation() == EtatReservation.EN_ATTENTE){
+			        				sleep(5000);
+			        			}
 			        			
 			        			//réservation validée
 			        			if(reservation.getEtatReservation() == EtatReservation.VALIDE){
