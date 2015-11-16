@@ -41,45 +41,22 @@ public class ThreadEcoute extends Thread {
 	        while(!(request = inFromClient.readLine().toUpperCase()).equals(STOP)){
 		        //Emission des données au client
 		        switch(request){
-		        	case FLOTTE:
+		        	//Client ne peut voir que les vehicules disponibles d'après l'énoncé
+		        	/*case FLOTTE:
 		        		outToClient.println("Tous les vehicules : " + Server.getFlotte());
 		    		break;        		
 		        	case FLOTTE_EN_ATTENTE :
 		        		outToClient.println("Vehicules en attente : " + Server.getFlotte(EtatVehicule.EN_ATTENTE));
 		    		break;
+		    		case FLOTTE_SORTIE :
+		        		outToClient.println("Vehicules sortis : " + Server.getFlotte(EtatVehicule.SORTI));
+		    		break;*/
 		        	case FLOTTE_DISPONIBLE :
 		        		outToClient.println("Vehicules disponibles : " + Server.getFlotte(EtatVehicule.DISPONIBLE));
 		    		break;
-		    		case FLOTTE_SORTIE :
-		        		outToClient.println("Vehicules sortis : " + Server.getFlotte(EtatVehicule.SORTI));
-		    		break;
-		        	case RESA_END:
-		        		outToClient.println("Veuillez entrez l'id de la réservation dont vous souhaitez retourner le véhicule.");
-		        		request = inFromClient.readLine();
-		        		order = Server.findReservationById(request);
-		        		if(order < 0){
-		        			outToClient.println("Cette réservation n'existe pas.");
-		        		}
-		        		else{
-		        			reservation = Server.resas.get(order);
-		        			outToClient.println("Pour confirmer votre identité, veuillez entrer l'id avec lequel vous avez réservé le véhicule.");
-			        		request = inFromClient.readLine();
-			        		if(!reservation.getIdClient().equals(request)){
-			        			outToClient.println("L'id ne correspond pas.");
-			        		}
-			        		else{
-			        			outToClient.println("Merci d'avoir retourner le véhicule "+reservation.getVehicule().getIdVehicule()+".");
-			        			Server.resas.remove(reservation);
-			        			reservation.getVehicule().setReservation(null);
-			        			reservation.getVehicule().setEtatVehicule(EtatVehicule.DISPONIBLE);
-			        			reservation = null;        			
-			        		}
-		        		}
-		        	break;
 		        	case RESA_BEGIN :
 		        		outToClient.println("Veuillez entre l'id de la voiture que vous souhaitez réserver.");
 		        		request = inFromClient.readLine();
-		        		System.out.println(request);
 		        		order = Server.findVehiculeById(request);
 		        		if(order < 0){
 		        			outToClient.println("Ce vehicule n'existe pas.");
@@ -93,15 +70,29 @@ public class ThreadEcoute extends Thread {
 			        		else if(vehicule.getEtatVehicule() == EtatVehicule.DISPONIBLE){
 		        				outToClient.println("Ce vehicule est disponible. Veuillez entrer votre id.");
 			        			request = inFromClient.readLine().toUpperCase();
+			        			outToClient.println("WAIT");
 			        			reservation = new Reservation(request,vehicule);
 			        			Server.resas.add(reservation);
-			        			vehicule.setReservation(reservation);
-			        			outToClient.println("WAIT");
-			        			Server.staff.get(random.nextInt(Server.staff.size()-1)).setReservation(reservation);
-			        			outToClient.println("Le véhicule " + vehicule.getIdVehicule() + " est prêt à être retiré."
-			        					+ "Votre réservation porte le numéro suivant : "
-			        					+vehicule.getReservation().getIdReservation()
-			        					);
+			        			//Attente validation ou invalidation par l'admin
+			        			System.out.println("Admin must validate or invalidate new reservation "+reservation);
+			        			//TODO boucle
+			        			while(reservation.getEtatReservation() == EtatReservation.EN_ATTENTE);
+			        			
+			        			//réservation validée
+			        			if(reservation.getEtatReservation() == EtatReservation.VALIDE){
+				        			vehicule.setReservation(reservation);
+				        			Server.staff.get(random.nextInt(Server.staff.size()-1)).setReservation(reservation);
+				        			outToClient.println("Le véhicule " + vehicule.getIdVehicule() + " est prêt à être retiré."
+				        					+ "Votre réservation porte le numéro suivant : "
+				        					+vehicule.getReservation().getIdReservation()
+				        					);
+			        			}
+			        			
+			        			//réservation invalidée
+			        			else{
+			        				Server.resas.remove(reservation);
+			        				outToClient.println("L'admin a rejeté la réservation.");
+			        			}
 			        		}
 		        		}
 		        	break;
@@ -125,6 +116,29 @@ public class ThreadEcoute extends Thread {
 			        		}
 		        		}	        		
 	        		break;
+		        	case RESA_END:
+		        		outToClient.println("Veuillez entrez l'id de la réservation dont vous souhaitez retourner le véhicule.");
+		        		request = inFromClient.readLine();
+		        		order = Server.findReservationById(request);
+		        		if(order < 0){
+		        			outToClient.println("Cette réservation n'existe pas.");
+		        		}
+		        		else{
+		        			reservation = Server.resas.get(order);
+		        			outToClient.println("Pour confirmer votre identité, veuillez entrer l'id avec lequel vous avez réservé le véhicule.");
+			        		request = inFromClient.readLine();
+			        		if(!reservation.getIdClient().equals(request)){
+			        			outToClient.println("L'id ne correspond pas.");
+			        		}
+			        		else{
+			        			outToClient.println("Merci d'avoir retourner le véhicule "+reservation.getVehicule().getIdVehicule()+".");
+			        			Server.resas.remove(reservation);
+			        			reservation.getVehicule().setReservation(null);
+			        			reservation.getVehicule().setEtatVehicule(EtatVehicule.DISPONIBLE);
+			        			reservation = null;        			
+			        		}
+		        		}
+		        	break;
 		        	default :
 		                outToClient.println("COMMANDE NON RECONNUE");
 		        	break;
@@ -134,6 +148,10 @@ public class ThreadEcoute extends Thread {
 	        outToClient.close();
 			socket.close();
 		} catch (Exception e) {e.printStackTrace();}
+	}
+	
+	public Socket getSocket(){
+		return this.socket;
 	}
 }
 
